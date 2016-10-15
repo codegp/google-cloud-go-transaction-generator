@@ -1,3 +1,4 @@
+outputPackage: examplepackage
 receiver: ExampleReceiver
 generators:
   - modelPackageName: examplemodel
