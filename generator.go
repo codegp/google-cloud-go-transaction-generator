@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"text/template"
 
@@ -43,25 +42,28 @@ var tmpl *template.Template
 
 func init() {
 	flag.Parse()
-
-	if len(flag.Args()) < 2 {
-		log.Fatalf("Usage: %s path/to/config.yaml", os.Args[0])
+	if len(flag.Args()) < 1 {
+		fmt.Printf("Usage: google-cloud-go-transaction-generator path/to/config.yaml")
+		os.Exit(1)
 	}
 
 	cfgPath = flag.Arg(1)
 	cfgBytes, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
-		log.Fatalf("Could not locate config file at path %s", cfgPath)
+		fmt.Printf("Could not locate config file at path %s", cfgPath)
+		os.Exit(1)
 	}
 
 	err = yaml.Unmarshal(cfgBytes, cfg)
 	if err != nil {
-		log.Fatalf("Could not parse configuration yaml file, %v", err)
+		fmt.Printf("Could not parse configuration yaml file, %v", err)
+		os.Exit(1)
 	}
 
 	tmpl, err = template.ParseFiles(templatePath)
 	if err != nil {
-		log.Fatalf("Failed to parse template, %v", err)
+		fmt.Printf("Failed to parse template, %v", err)
+		os.Exit(1)
 	}
 }
 
@@ -73,10 +75,10 @@ func main() {
 
 func gen(generatorIndex int) {
 	generator := cfg.generators[generatorIndex]
-	log.Printf("Generating models for %s", generator.modelPackageName)
+	fmt.Printf("Generating models for %s", generator.modelPackageName)
 
 	for _, model := range generator.models {
-		log.Printf("   Generating model %s", model)
+		fmt.Printf("   Generating model %s", model)
 
 		outputDir := cfg.outputDir
 		if generator.outputDir != "" {
@@ -86,7 +88,7 @@ func gen(generatorIndex int) {
 		outputFile := fmt.Sprintf("%s/gen_%s.go", outputDir, model)
 		f, err := os.Create(outputFile)
 		if err != nil {
-			log.Fatalf("Failed to create file at %s", outputFile)
+			fmt.Printf("Failed to create file at %s", outputFile)
 		}
 
 		writer := bufio.NewWriter(f)
@@ -99,7 +101,7 @@ func gen(generatorIndex int) {
 		})
 
 		if err != nil {
-			log.Fatalf("Failed to execute template: %v", err)
+			fmt.Printf("Failed to execute template: %v", err)
 		}
 
 		writer.Flush()
