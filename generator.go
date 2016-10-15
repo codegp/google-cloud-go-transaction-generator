@@ -17,19 +17,22 @@ import (
 const templatePath = "templates/modeltemplate.go.tmpl"
 
 type config struct {
-	Receiver   string       `yaml:"receiver"`
-	Generators []*generator `yaml:"generators"`
-	OutputDir  string       `yaml:"outputDir"`
+	OutputPackage string       `yaml:"outputPackage"`
+	Receiver      string       `yaml:"receiver"`
+	Generators    []*generator `yaml:"generators"`
+	OutputDir     string       `yaml:"outputDir"`
 }
 
 type generator struct {
 	ModelPackageName string   `yaml:"modelPackageName"`
 	ModelImportPath  string   `yaml:"modelsImportPath"`
 	Models           []string `yaml:"models"`
+	OutputPackage    string   `yaml:"outputPackage"`
 	OutputDir        string   `yaml:"outputDir"`
 }
 
 type templateData struct {
+	OutputPackage      string
 	Model              string
 	ModelPackage       string
 	ModelPackageImport string
@@ -60,8 +63,6 @@ func init() {
 		fmt.Printf("Could not parse configuration yaml file, %v", err)
 		os.Exit(1)
 	}
-	fmt.Printf("WTF %v", cfg.Receiver)
-	fmt.Printf("WTFDSF %s", string(cfgBytes))
 
 	tmpl, err = template.ParseFiles(templatePath)
 	if err != nil {
@@ -88,6 +89,11 @@ func gen(generatorIndex int) {
 			outputDir = generator.OutputDir
 		}
 
+		outputPackage := cfg.OutputPackage
+		if generator.OutputPackage != "" {
+			outputPackage = generator.OutputPackage
+		}
+
 		outputFile := fmt.Sprintf("%s/gen_%s.go", outputDir, model)
 		f, err := os.Create(outputFile)
 		if err != nil {
@@ -97,6 +103,7 @@ func gen(generatorIndex int) {
 		writer := bufio.NewWriter(f)
 
 		err = tmpl.Execute(writer, &templateData{
+			OutputPackage:      outputPackage,
 			Model:              model,
 			ModelPackage:       generator.ModelPackageName,
 			ModelPackageImport: generator.ModelImportPath,
