@@ -65,28 +65,6 @@ func init() {
 	}
 }
 
-// var localModels []string
-// var thriftModels []string
-//
-// func init() {
-// 	localModels = []string{
-// 		"GameType",
-// 		"User",
-// 		"Project",
-// 		"Game",
-// 		"Map",
-// 	}
-//
-// 	// thrift defined models
-// 	thriftModels = []string{
-// 		"BotType",
-// 		"TerrainType",
-// 		"AttackType",
-// 		"MoveType",
-// 		"ItemType",
-// 	}
-// }
-
 func main() {
 	for i := range cfg.generators {
 		gen(i)
