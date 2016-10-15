@@ -8,25 +8,25 @@ import (
 	"os"
 	"text/template"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 /*
   This file generates a file with crud operation functions for each model type
 */
-const templatePath = "../templates/modeltemplate.go.tmpl"
+const templatePath = "templates/modeltemplate.go.tmpl"
 
 type config struct {
-	receiver   string
-	generators []*generator
-	outputDir  string
+	Receiver   string       `yaml:"receiver"`
+	Generators []*generator `yaml:"generators"`
+	OutputDir  string       `yaml:"outputDir"`
 }
 
 type generator struct {
-	modelPackageName string
-	modelsImportPath string
-	models           []string
-	outputDir        string
+	ModelPackageName string   `yaml:"modelPackageName"`
+	ModelImportPath  string   `yaml:"modelsImportPath"`
+	Models           []string `yaml:"models"`
+	OutputDir        string   `yaml:"outputDir"`
 }
 
 type templateData struct {
@@ -36,7 +36,7 @@ type templateData struct {
 	Receiver           string
 }
 
-var cfg *config
+var cfg config
 var cfgPath string
 var tmpl *template.Template
 
@@ -50,15 +50,18 @@ func init() {
 	cfgPath = flag.Arg(0)
 	cfgBytes, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
-		fmt.Printf("Could not locate config file at path %s", cfgPath)
+		fmt.Printf("Could not read config file at path %s", cfgPath)
 		os.Exit(1)
 	}
 
-	err = yaml.Unmarshal(cfgBytes, cfg)
+	cfg = config{}
+	err = yaml.Unmarshal(cfgBytes, &cfg)
 	if err != nil {
 		fmt.Printf("Could not parse configuration yaml file, %v", err)
 		os.Exit(1)
 	}
+	fmt.Printf("WTF %v", cfg.Receiver)
+	fmt.Printf("WTFDSF %s", string(cfgBytes))
 
 	tmpl, err = template.ParseFiles(templatePath)
 	if err != nil {
@@ -68,21 +71,21 @@ func init() {
 }
 
 func main() {
-	for i := range cfg.generators {
+	for i := range cfg.Generators {
 		gen(i)
 	}
 }
 
 func gen(generatorIndex int) {
-	generator := cfg.generators[generatorIndex]
-	fmt.Printf("Generating models for %s", generator.modelPackageName)
+	generator := cfg.Generators[generatorIndex]
+	fmt.Printf("Generating models for %s", generator.ModelPackageName)
 
-	for _, model := range generator.models {
+	for _, model := range generator.Models {
 		fmt.Printf("   Generating model %s", model)
 
-		outputDir := cfg.outputDir
-		if generator.outputDir != "" {
-			outputDir = generator.outputDir
+		outputDir := cfg.OutputDir
+		if generator.OutputDir != "" {
+			outputDir = generator.OutputDir
 		}
 
 		outputFile := fmt.Sprintf("%s/gen_%s.go", outputDir, model)
@@ -95,9 +98,9 @@ func gen(generatorIndex int) {
 
 		err = tmpl.Execute(writer, &templateData{
 			Model:              model,
-			ModelPackage:       generator.modelPackageName,
-			ModelPackageImport: generator.modelsImportPath,
-			Receiver:           cfg.receiver,
+			ModelPackage:       generator.ModelPackageName,
+			ModelPackageImport: generator.ModelImportPath,
+			Receiver:           cfg.Receiver,
 		})
 
 		if err != nil {

@@ -1,0 +1,7 @@
+receiver: ExampleReceiver
+generators:
+  - modelPackageName: examplemodel
+    modelsImportPath: github.com/codegp/google-cloud-go-transaction-generator/examplemodel
+    models:
+      - ExampleModel
+outputDir: "./example"
