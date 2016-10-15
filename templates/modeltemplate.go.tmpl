@@ -1,0 +1,93 @@
+package cloudpersister
+
+import (
+	"fmt"
+
+	"cloud.google.com/go/datastore"
+	"{{.ModelPackageImport}}"
+
+	"golang.org/x/net/context"
+)
+
+// Get{{.Model}} retrieves a {{.Model}} by its ID.
+func (c *{{.Receiver}}) Get{{.Model}}(id int64) (*{{.ModelPackage}}.{{.Model}}, error) {
+	ctx := context.Background()
+	k := datastore.NewKey(ctx, "{{.Model}}", "", id, nil)
+	{{.Model}} := &{{.ModelPackage}}.{{.Model}}{}
+	if err := c.DatastoreClient().Get(ctx, k, {{.Model}}); err != nil {
+		return nil, fmt.Errorf("datastoredb: could not get {{.Model}}: %v", err)
+	}
+	{{.Model}}.ID = id
+	return {{.Model}}, nil
+}
+
+// Add{{.Model}} saves a given {{.Model}}, assigning it a new ID.
+func (c *{{.Receiver}}) Add{{.Model}}(b *{{.ModelPackage}}.{{.Model}}) (*{{.ModelPackage}}.{{.Model}}, error) {
+	ctx := context.Background()
+	k := datastore.NewIncompleteKey(ctx, "{{.Model}}", nil)
+	k, err := c.DatastoreClient().Put(ctx, k, b)
+	if err != nil {
+		return nil, fmt.Errorf("datastoredb: could not put {{.Model}}: %v", err)
+	}
+	b.ID = k.ID()
+	return b, nil
+}
+
+// Delete{{.Model}} removes a given {{.Model}} by its ID.
+func (c *{{.Receiver}}) Delete{{.Model}}(id int64) error {
+	ctx := context.Background()
+	k := datastore.NewKey(ctx, "{{.Model}}", "", id, nil)
+	if err := c.DatastoreClient().Delete(ctx, k); err != nil {
+		return fmt.Errorf("datastoredb: could not delete {{.Model}}: %v", err)
+	}
+	return nil
+}
+
+// Update{{.Model}} updates the entry for a given {{.Model}}.
+func (c *{{.Receiver}}) Update{{.Model}}(b *{{.ModelPackage}}.{{.Model}}) error {
+	ctx := context.Background()
+	k := datastore.NewKey(ctx, "{{.Model}}", "", b.ID, nil)
+	if _, err := c.DatastoreClient().Put(ctx, k, b); err != nil {
+		return fmt.Errorf("datastoredb: could not update {{.Model}}: %v", err)
+	}
+	return nil
+}
+
+// List{{.Model}}s returns a list of {{.Model}}s
+func (c *{{.Receiver}}) List{{.Model}}s() ([]*{{.ModelPackage}}.{{.Model}}, error) {
+	ctx := context.Background()
+	{{.Model}}s := make([]*{{.ModelPackage}}.{{.Model}}, 0)
+	q := datastore.NewQuery("{{.Model}}")
+
+	keys, err := c.DatastoreClient().GetAll(ctx, q, &{{.Model}}s)
+
+	if err != nil {
+		return nil, fmt.Errorf("datastoredb: could not list {{.Model}}s: %v", err)
+	}
+
+	for i, k := range keys {
+		{{.Model}}s[i].ID = k.ID()
+	}
+
+	return {{.Model}}s, nil
+}
+
+//  Query{{.Model}}sByProp
+func (c *{{.Receiver}}) Query{{.Model}}sByProp(propName, value string) (*{{.ModelPackage}}.{{.Model}}, error) {
+	ctx := context.Background()
+	{{.Model}}s := make([]*{{.ModelPackage}}.{{.Model}}, 0)
+	q := datastore.NewQuery("{{.Model}}").Filter(fmt.Sprintf("%s =", propName), value)
+
+	keys, err := c.DatastoreClient().GetAll(ctx, q, &{{.Model}}s)
+
+	if err != nil {
+		return nil, fmt.Errorf("datastoredb: could not list {{.Model}}s: %v", err)
+	}
+
+	if len({{.Model}}s) == 0 {
+		return nil, nil
+	}
+
+	{{.Model}}s[0].ID = keys[0].ID()
+	return {{.Model}}s[0], nil
+}
