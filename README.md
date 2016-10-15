@@ -14,7 +14,7 @@ This package name is ridiculously long. I recommend you add an alias to your bas
 ##### Define a config.yaml
 
 ```
-receiverPackage: receiverpackage # package in which the generated code will live
+outputPackage: outputpackage # package in which the generated code will live
 receiver: MyClient # struct that has a DatastoreClient getter
 generators:
   - modelPackageName: exampleModels
@@ -28,6 +28,7 @@ generators:
       - ModelC
       - ModelD
     outputDir: "./customOutputDir" # custom output directory for this set of models
+    outputPackage: "customoutputpackage" # custom output package for this set of models
 outputDir: "./defaultOutputDir"
 ```
 
