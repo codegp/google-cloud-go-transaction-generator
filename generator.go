@@ -47,7 +47,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	cfgPath = flag.Arg(1)
+	cfgPath = flag.Arg(0)
 	cfgBytes, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		fmt.Printf("Could not locate config file at path %s", cfgPath)
