@@ -1,0 +1,3 @@
+package: github.com/codegp/google-cloud-go-transaction-generator
+import:
+- package: gopkg.in/yaml.v2
