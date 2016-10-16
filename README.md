@@ -1,5 +1,12 @@
 # google-cloud-go-transaction-generator
-Generates common transaction functions for google cloude datastore models
+Generates common transaction functions for google cloude datastore models. For use with [google-cloud-go](https://github.com/GoogleCloudPlatform/google-cloud-go) datastore package.
+
+Generates functions for:
+ - get
+ - add
+ - delete
+ - update
+ - query by property
 
 ### Usage
 
@@ -15,7 +22,7 @@ This package name is ridiculously long. I recommend you add an alias to your bas
 
 ```
 outputPackage: outputpackage # package in which the generated code will live
-receiver: MyClient # struct that has a DatastoreClient getter
+receiver: MyClient # struct that has a DatastoreClient getter, which returns a *datastore.Client
 generators:
   - modelPackageName: exampleModels
     modelsImportPath: github.com/example/exampleModels
