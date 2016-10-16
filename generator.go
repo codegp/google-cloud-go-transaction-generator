@@ -64,7 +64,13 @@ func init() {
 		os.Exit(1)
 	}
 
-	tmpl, err = template.ParseFiles(templatePath)
+	tmpl = template.New("tmpl")
+	tmplContent, err := Asset(templatePath)
+	if err != nil {
+		fmt.Printf("Failed to parse binded template, %v", err)
+	}
+
+	tmpl, err = tmpl.Parse(string(tmplContent))
 	if err != nil {
 		fmt.Printf("Failed to parse template, %v", err)
 		os.Exit(1)
@@ -79,10 +85,10 @@ func main() {
 
 func gen(generatorIndex int) {
 	generator := cfg.Generators[generatorIndex]
-	fmt.Printf("Generating models for %s", generator.ModelPackageName)
+	fmt.Printf("Generating models for %s\n", generator.ModelPackageName)
 
 	for _, model := range generator.Models {
-		fmt.Printf("   Generating model %s", model)
+		fmt.Printf("   Generating model %s\n", model)
 
 		outputDir := cfg.OutputDir
 		if generator.OutputDir != "" {
@@ -98,6 +104,7 @@ func gen(generatorIndex int) {
 		f, err := os.Create(outputFile)
 		if err != nil {
 			fmt.Printf("Failed to create file at %s", outputFile)
+			os.Exit(1)
 		}
 
 		writer := bufio.NewWriter(f)
@@ -112,6 +119,7 @@ func gen(generatorIndex int) {
 
 		if err != nil {
 			fmt.Printf("Failed to execute template: %v", err)
+			os.Exit(1)
 		}
 
 		writer.Flush()
