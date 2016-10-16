@@ -141,3 +141,13 @@ gcgtg ./config.yaml
  }
 
  ```
+
+### Bind data?
+To generate the bindata.go file, which embeds the template file into the go source code you must install go-bindata. Read more [here](https://github.com/jteeuwen/go-bindata)
+
+The template data must be binded to distribute the tool without any template dependencies.
+
+Anytime the template is changed you must run:
+```
+go-bindata templates/modeltemplate.go.tmpl
+```
