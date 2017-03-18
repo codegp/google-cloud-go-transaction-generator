@@ -23,11 +23,15 @@ func (c *{{.Receiver}}) Get{{.Model}}(id int64) (*{{.ModelPackage}}.{{.Model}}, 
 
 // GetMulti{{.Model}} retrieves a list of {{.Model}}s by their ID.
 func (c *{{.Receiver}}) GetMulti{{.Model}}(ids []int64) ([]*{{.ModelPackage}}.{{.Model}}, error) {
+	if len(ids) == 0 {
+		return []*{{.ModelPackage}}.{{.Model}}{}, nil
+	}
 	ctx := context.Background()
 	ks := make([]*datastore.Key, len(ids))
 	{{.Model}}s := make([]*{{.ModelPackage}}.{{.Model}}, len(ids))
 	for i, id := range ids {
 		ks[i] = datastore.NewKey(ctx, "{{.Model}}", "", id, nil)
+		{{.Model}}s[i] = &{{.ModelPackage}}.{{.Model}}{}
 	}
 	if err := c.DatastoreClient().GetMulti(ctx, ks, {{.Model}}s); err != nil {
 		return nil, fmt.Errorf("datastoredb: could not get {{.Model}}s: %v", err)
